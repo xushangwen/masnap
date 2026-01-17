@@ -22,34 +22,61 @@ export async function POST(req: Request) {
 
     const prompt = `Generate a 2026 Year of the Horse Chinese New Year portrait based on the reference photo.
 
-CRITICAL RULE: Preserve the person's face 100% pixel-perfect. Do NOT alter any facial features.
+⚠️ CRITICAL FACE PRESERVATION RULE ⚠️
+The person's face is LOCKED and CANNOT be altered in ANY way.
+You MUST preserve 100% facial identity. This is NON-NEGOTIABLE.
+
+**Face Identity Lock (MANDATORY):**
+- Eyes: Exact eye shape, size, position, spacing, eyelid type (single/double), pupil color
+- Nose: Exact nose bridge height, nostril shape, nose tip, nose width
+- Mouth: Exact lip shape, thickness, mouth width, teeth alignment
+- Face Shape: Exact jawline, cheekbones, chin shape, face width/length ratio
+- Skin: Exact skin tone, texture, moles, freckles, blemishes
+- Hair: Exact hairstyle, hair color, hairline position
+- Ears: Exact ear shape, size, position
+- Eyebrows: Exact eyebrow shape, thickness, arch, color
+- Facial Proportions: Exact distances between features (eye-to-nose, nose-to-mouth, etc.)
+
+The person MUST be instantly recognizable as the EXACT same individual.
+Think of this as a clothing swap, NOT a face swap or face modification.
 
 **Settings:**
 - Aspect Ratio: 3:4 vertical
 - Layout: 1x2 grid (top + bottom panels)
-- Style: Natural lifestyle portrait with soft lighting
+- Style: Natural lifestyle portrait with soft, flattering lighting
 
-**Face Preservation (NON-NEGOTIABLE):**
-Keep ALL facial features identical: eyes, nose, mouth, face shape, skin tone, hair, ears, eyebrows. Only modify clothing and add decorative elements.
-
-**Modifications:**
-- Clothing: Red festive sweater with horse year theme
+**What You CAN Modify:**
+- Clothing: Add red festive sweater with horse year theme
 - Background: Warm beige with subtle Chinese New Year decorations
-- Lighting: Soft, natural light
+- Lighting: Enhance with soft, natural light (but keep skin tone identical)
+- Decorative Elements: Add paper-cut horse, calligraphy text
+
+**What You CANNOT Modify:**
+- ANY facial features (see Face Identity Lock above)
+- Skin tone or skin texture
+- Hair style or hair color
+- Body proportions
 
 **Grid Layout:**
 
 TOP PANEL:
-- Holding bright red paper-cut horse near face (not covering)
-- Expression: Playful, happy
-- Text: "一马当先" (calligraphy, Chinese red)
+- Person holding bright red paper-cut horse near face (NOT covering any facial features)
+- Expression: Playful, happy (but keep natural facial structure)
+- Text Overlay: "一马当先" (bold calligraphy style, Chinese red color)
 
 BOTTOM PANEL:
-- Hands clasped in traditional greeting gesture
-- Expression: Warm smile
-- Text: "马到成功" (calligraphy, Chinese red)
+- Person with hands clasped in traditional Chinese greeting gesture (抱拳)
+- Expression: Warm, genuine smile (but keep natural facial structure)
+- Text Overlay: "马到成功" (bold calligraphy style, Chinese red color)
 
-FINAL CHECK: Face must be recognizable as the exact same person. Any deviation = failure.`;
+⚠️ FINAL VERIFICATION ⚠️
+Before outputting, verify:
+1. Face is 100% identical to reference photo
+2. All facial features match exactly
+3. Person is instantly recognizable
+4. Only clothing and background have changed
+
+If ANY facial feature has changed, the generation has FAILED.`;
 
     // Gemini 模型选择规范（2026-01-17）：
     // - 图像生成：gemini-3-pro-image-preview

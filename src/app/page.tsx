@@ -100,12 +100,62 @@ export default function Home() {
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!resultImage) return;
-    const link = document.createElement("a");
-    link.href = resultImage;
-    link.download = "masnap-2026-portrait.png";
-    link.click();
+
+    try {
+      // 将 Base64 转换为 Blob
+      const response = await fetch(resultImage);
+      const blob = await response.blob();
+
+      // 检测是否为移动设备
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+      if (isMobile) {
+        // 移动端：尝试使用 Web Share API
+        if (navigator.share && navigator.canShare) {
+          const file = new File([blob], "masnap-2026-portrait.png", {
+            type: blob.type,
+          });
+
+          if (navigator.canShare({ files: [file] })) {
+            try {
+              await navigator.share({
+                files: [file],
+                title: "马年新春写真",
+                text: "我的 2026 马年新春写真",
+              });
+              return;
+            } catch (err) {
+              // 用户取消分享或分享失败，继续使用备用方案
+              console.log("Share cancelled or failed:", err);
+            }
+          }
+        }
+
+        // 移动端备用方案：打开新窗口让用户长按保存
+        const url = URL.createObjectURL(blob);
+        window.open(url, "_blank");
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+      } else {
+        // 桌面端：使用 Blob URL 下载（修复 Mac 缩略图问题）
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "masnap-2026-portrait.png";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+      }
+    } catch (err) {
+      console.error("Download failed:", err);
+      // 降级方案：使用原始方法
+      const link = document.createElement("a");
+      link.href = resultImage;
+      link.download = "masnap-2026-portrait.png";
+      link.click();
+    }
   };
 
   const handleReset = () => {
@@ -179,17 +229,17 @@ export default function Home() {
           >
             <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl shadow-neutral-900/10 border border-white/50 overflow-hidden">
               {/* Steps Indicator */}
-              <div className="px-8 py-5 border-b border-neutral-100/80 bg-white/50">
-                <div className="flex items-center justify-center gap-4 text-sm">
+              <div className="px-4 sm:px-8 py-5 border-b border-neutral-100/80 bg-white/50">
+                <div className="flex items-center justify-center gap-2 sm:gap-4 text-sm">
                   <div
                     className={cn(
-                      "flex items-center gap-2 transition-colors",
+                      "flex items-center gap-1.5 sm:gap-2 transition-colors",
                       image ? "text-green-600" : "text-red-600"
                     )}
                   >
                     <div
                       className={cn(
-                        "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors",
+                        "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors shrink-0",
                         image
                           ? "bg-green-100 text-green-600"
                           : "bg-red-100 text-red-600"
@@ -197,12 +247,12 @@ export default function Home() {
                     >
                       {image ? <Check className="w-4 h-4" /> : "1"}
                     </div>
-                    <span className="font-medium">上传照片</span>
+                    <span className="font-medium text-xs sm:text-sm whitespace-nowrap">上传照片</span>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-neutral-300" />
+                  <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-neutral-300 shrink-0" />
                   <div
                     className={cn(
-                      "flex items-center gap-2 transition-colors",
+                      "flex items-center gap-1.5 sm:gap-2 transition-colors",
                       loading
                         ? "text-orange-600"
                         : resultImage
@@ -212,7 +262,7 @@ export default function Home() {
                   >
                     <div
                       className={cn(
-                        "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors",
+                        "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors shrink-0",
                         loading
                           ? "bg-orange-100 text-orange-600"
                           : resultImage
@@ -222,18 +272,18 @@ export default function Home() {
                     >
                       {resultImage ? <Check className="w-4 h-4" /> : "2"}
                     </div>
-                    <span className="font-medium">AI 生成</span>
+                    <span className="font-medium text-xs sm:text-sm whitespace-nowrap">AI 生成</span>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-neutral-300" />
+                  <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-neutral-300 shrink-0" />
                   <div
                     className={cn(
-                      "flex items-center gap-2 transition-colors",
+                      "flex items-center gap-1.5 sm:gap-2 transition-colors",
                       resultImage ? "text-green-600" : "text-neutral-400"
                     )}
                   >
                     <div
                       className={cn(
-                        "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors",
+                        "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors shrink-0",
                         resultImage
                           ? "bg-green-100 text-green-600"
                           : "bg-neutral-100 text-neutral-400"
@@ -241,7 +291,7 @@ export default function Home() {
                     >
                       {resultImage ? <Check className="w-4 h-4" /> : "3"}
                     </div>
-                    <span className="font-medium">下载写真</span>
+                    <span className="font-medium text-xs sm:text-sm whitespace-nowrap">下载写真</span>
                   </div>
                 </div>
               </div>
@@ -300,7 +350,6 @@ export default function Home() {
                           id="file-upload"
                           className="hidden"
                           accept="image/*"
-                          capture="user"
                           onChange={handleFileChange}
                         />
                       </div>
