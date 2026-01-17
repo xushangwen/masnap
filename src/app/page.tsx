@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import imageCompression from "browser-image-compression";
 import {
   Upload,
   Download,
@@ -28,18 +29,31 @@ export default function Home() {
     if (file) processFile(file);
   };
 
-  const processFile = (file: File) => {
+  const processFile = async (file: File) => {
     if (!file.type.startsWith("image/")) {
       setError("请上传图片文件");
       return;
     }
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImage(reader.result as string);
-      setResultImage(null);
-      setError(null);
-    };
-    reader.readAsDataURL(file);
+
+    try {
+      // 压缩图片
+      const compressedFile = await imageCompression(file, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      });
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImage(reader.result as string);
+        setResultImage(null);
+        setError(null);
+      };
+      reader.readAsDataURL(compressedFile);
+    } catch (err) {
+      console.error("图片压缩失败:", err);
+      setError("图片处理失败，请重试");
+    }
   };
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -305,7 +319,7 @@ export default function Home() {
                         <img
                           src={image}
                           alt="Preview"
-                          className="w-full max-h-[400px] object-contain mx-auto"
+                          className="w-full max-h-[300px] sm:max-h-[400px] md:max-h-[500px] object-contain mx-auto"
                         />
                         <button
                           onClick={handleReset}

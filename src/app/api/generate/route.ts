@@ -89,7 +89,7 @@ THE PAPER-CUT HORSE MUST BE PLACED NEAR THE FACE BUT MUST NOT OBSTRUCT ANY FACIA
 EXECUTE WITH PERFECT FACE REPLICATION NOW.`;
 
     const model = genAI.getGenerativeModel({
-      model: "gemini-3-pro-image-preview",
+      model: "gemini-2.0-flash-exp",
     });
 
     const result = await model.generateContent([
@@ -133,9 +133,29 @@ EXECUTE WITH PERFECT FACE REPLICATION NOW.`;
     });
   } catch (error) {
     console.error("Generation error:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+
+    // 友好的错误提示映射
+    let userMessage = "生成失败，请重试";
+    let details = "";
+
+    if (error instanceof Error) {
+      const errorMsg = error.message.toLowerCase();
+
+      if (errorMsg.includes("api key") || errorMsg.includes("unauthorized")) {
+        userMessage = "服务配置错误，请联系管理员";
+      } else if (errorMsg.includes("rate limit") || errorMsg.includes("quota")) {
+        userMessage = "请求过于频繁，请稍后再试";
+      } else if (errorMsg.includes("image") && errorMsg.includes("large")) {
+        userMessage = "图片过大，请上传小于 5MB 的图片";
+      } else if (errorMsg.includes("invalid") || errorMsg.includes("format")) {
+        userMessage = "图片格式无效，请上传 JPG 或 PNG 格式";
+      } else {
+        details = error.message;
+      }
+    }
+
     return Response.json(
-      { error: "生成失败", details: errorMessage },
+      { error: userMessage, details },
       { status: 500 }
     );
   }
