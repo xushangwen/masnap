@@ -67,14 +67,14 @@ Based on this reference photo, generate a 2026 Year of the Horse Chinese New Yea
 **TOP PANEL (上):**
 - Action: 手拿精致的亮红色【剪纸马】放在脸旁边，离开脸部有点距离，眼神流露出俏皮
 - Mood: 灵动、开心
-- Text Overlay: "你踏马要风"
+- Text Overlay: "一马当先"
   - 字体: 磅礴气势书法手写字体，有飞白，有浓淡，有节奏感
   - 颜色: 中国红
 
 **BOTTOM PANEL (下):**
 - Action: 双手抱拳作揖，笑容灿烂，充满新年的喜庆氛围
 - Mood: 热情、祝福
-- Text Overlay: "NMLGB"
+- Text Overlay: "马到成功"
   - 字体: 磅礴气势书法手写字体，有飞白，有浓淡，有节奏感
   - 颜色: 中国红
 
@@ -88,8 +88,12 @@ ONLY THE RED SWEATER AND FESTIVE ELEMENTS MAY BE ADDED.
 THE PAPER-CUT HORSE MUST BE PLACED NEAR THE FACE BUT MUST NOT OBSTRUCT ANY FACIAL FEATURES.
 EXECUTE WITH PERFECT FACE REPLICATION NOW.`;
 
+    // Gemini 模型选择规范（2026-01-17）：
+    // - 图像生成：gemini-3-pro-image-preview
+    // - 文本生成（快速）：gemini-3-flash-preview
+    // - 文本生成（高级）：gemini-3-pro-preview
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-3-pro-image-preview",
     });
 
     const result = await model.generateContent([
