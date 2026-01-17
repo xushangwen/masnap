@@ -300,6 +300,7 @@ export default function Home() {
                           id="file-upload"
                           className="hidden"
                           accept="image/*"
+                          capture="user"
                           onChange={handleFileChange}
                         />
                       </div>
