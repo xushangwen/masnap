@@ -1,8 +1,5 @@
-import { GoogleGenAI } from "@google/genai";
-
-const ai = new GoogleGenAI({
-  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
-});
+import { google } from "@ai-sdk/google";
+import { generateText } from "ai";
 
 export async function POST(req: Request) {
   try {
@@ -11,14 +8,6 @@ export async function POST(req: Request) {
     if (!image) {
       return Response.json({ error: "未提供图片" }, { status: 400 });
     }
-
-    // 解析 Base64 图片
-    const matches = image.match(/^data:image\/(\w+);base64,(.+)$/);
-    if (!matches) {
-      return Response.json({ error: "图片格式无效" }, { status: 400 });
-    }
-    const mimeType = `image/${matches[1]}`;
-    const base64Data = matches[2];
 
     const prompt = `FACE IDENTITY LOCKDOWN PROTOCOL:
 TREAT THE REFERENCE FACE AS A TEMPLATE THAT CANNOT BE ALTERED.
@@ -88,52 +77,21 @@ ONLY THE RED SWEATER AND FESTIVE ELEMENTS MAY BE ADDED.
 THE PAPER-CUT HORSE MUST BE PLACED NEAR THE FACE BUT MUST NOT OBSTRUCT ANY FACIAL FEATURES.
 EXECUTE WITH PERFECT FACE REPLICATION NOW.`;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3-pro-image-preview",
-      contents: [
+    const result = await generateText({
+      model: google("gemini-2.0-flash-exp"),
+      messages: [
         {
-          inlineData: {
-            mimeType: mimeType,
-            data: base64Data,
-          },
+          role: "user",
+          content: [
+            { type: "image", image },
+            { type: "text", text: prompt },
+          ],
         },
-        { text: prompt },
       ],
-      config: {
-        imageConfig: {
-          aspectRatio: "3:4",
-          imageSize: "2K",
-        },
-      },
     });
 
-    // 提取生成的图片
-    const parts = response.candidates?.[0]?.content?.parts;
-    if (!parts) {
-      return Response.json({ error: "生成失败，无返回内容" }, { status: 500 });
-    }
-
-    let generatedImage: string | null = null;
-    let generatedText: string | null = null;
-
-    for (const part of parts) {
-      if (part.inlineData) {
-        generatedImage = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-      } else if (part.text) {
-        generatedText = part.text;
-      }
-    }
-
-    if (!generatedImage) {
-      return Response.json(
-        { error: "未生成图片", details: generatedText || "未知错误" },
-        { status: 500 }
-      );
-    }
-
     return Response.json({
-      image: generatedImage,
-      text: generatedText,
+      text: result.text,
     });
   } catch (error) {
     console.error("Generation error:", error);
